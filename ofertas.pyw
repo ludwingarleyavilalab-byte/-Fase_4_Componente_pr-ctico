@@ -21,21 +21,19 @@ class Servicio(ABC): # tenemos el global de los servicios, luego definimos reser
         self.texto_servicio  = texto_servicio
 
     
-    def tributacion(self, impuesto = 0.19, descuento_porcentaje = 0): #Vamos a ponerle iva por defecto a los servicios pq aja, bonito..de manera si colocamos 100k por defecto sea 119k
-        if descuento_porcentaje>=100:
-         descuento_pocentaje = int(input("Confirme el valor del porcetaje"))
-        if descuento_pocentaje>100:
-           raise ParametroInvalidoError("El descuento debe estar entre 0 y 100")
-        
+    def tributacion(self, base, impuesto=0.19, descuento_porcentaje=0):
+        if not 0 <= descuento_porcentaje <= 100:
+            raise ParametroInvalidoError("El descuento debe estar entre 0 y 100")
+
         descuento = descuento_porcentaje / 100 #opero como decimal
-        valor_impuesto = self.valor_servicio * impuesto 
-        subtotal = valor_impuesto + self.valor_servicio
-        valor_descuento = subtotal * descuento #el descuento despues del sonbrecosto del impuesto
+        valor_impuesto = base * impuesto
+        subtotal = valor_impuesto + base
+        valor_descuento = subtotal * descuento #el descuento despues del impuesto
         return subtotal - valor_descuento
         
 
     @abstractmethod
-    def calcular_costo(self):
+    def calcular_costo(self, duracion, impuesto=0.19, descuento_porcentaje=0):
         pass
 
     @abstractmethod
@@ -175,4 +173,27 @@ class Servicio_Nube(Servicio):
 
 
          
+catalogo_servicios = [
+   
+    Reserva_Salas("S01", 100000, "Sala de reuniones", "Andes", 10, "Proyector"),
+    Reserva_Salas("S02", 180000, "Sala de conferencias", "Amazonas", 40, "Sonido y pantalla"),
+    Reserva_Salas("S03", 60000, "Sala de estudio", "Orinoco", 6, "Tablero"),
+
+    Alquiler_De_Equipos("E01", 45000, "Portátil", "Laptop", 8, date(2026, 11, 20), 3),
+    Alquiler_De_Equipos("E02", 30000, "Proyector portátil", "Video beam", 4, date(2026, 11, 22), 2),
+    Alquiler_De_Equipos("E03", 70000, "Cámara profesional", "Cámara DSLR", 2, date(2026, 11, 25), 5),
+
+    Asesoria_Especializada("A01", 120000, "Asesoría en seguridad", "Ciberseguridad"),
+    Asesoria_Especializada("A02", 90000, "Asesoría en desarrollo", "Arquitectura de software"),
+    Asesoria_Especializada("A03", 80000, "Asesoría en datos", "Análisis de datos"),
+
+    Servicio_Nube("N01", 50000, "Almacenamiento", 2, 6, date(2026, 12, 1)),
+    Servicio_Nube("N02", 75000, "Hosting de aplicación", 5, 12, date(2027, 1, 15)),
+    Servicio_Nube("N03", 40000, "Copias de seguridad", 10, 3, date(2026, 12, 10)),
+]
+
+
+for s in catalogo_servicios:
+    print(f"[{s.codigo_servicio}] {s}")
+
 

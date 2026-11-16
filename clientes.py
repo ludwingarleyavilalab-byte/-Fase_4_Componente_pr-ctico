@@ -5,7 +5,7 @@ VERDE = "\033[92m"
 AMARILLO = "\033[93m"
 RESET = "\033[0m"
 import re
-#from entidades import EntidadBase Como comentario para funcionamiento "local" o independiente a otros modulos, cualquier cosa quitar el #
+from entidades import EntidadBase 
 
 
 class ErrorSoftwareFJ(Exception):
@@ -17,14 +17,13 @@ class ParametroFaltanteError(ErrorSoftwareFJ):
 class ClienteInvalidoError(ErrorSoftwareFJ):
     """El dato existe pero tiene un formato incorrecto."""
 
-#class Cliente(EntidadBase)
-class Cliente:
+class Cliente(EntidadBase):
     def __init__(self, nombre, documento, correo, telefono):
         self._nombre = self._validar_nombre(nombre)
         self._documento = self._validar_documento(documento)
         self._correo = self._validar_correo(correo)
         self._telefono = self._validar_telefono(telefono)
-       #super().__init__()    aqui tambien el #
+        super().__init__(self._documento)
 
     @staticmethod
     def _validar_nombre(nombre):
@@ -78,8 +77,13 @@ class Cliente:
     def telefono(self):
         return self._telefono
 
-    def __str__(self):
-         return (f"Cliente '{self._nombre}' - doc {self._documento}, "f"{self._correo}, tel {self._telefono}")
+    def describir(self):return (f"Cliente '{self._nombre}' - doc {self._documento}, "f"{self._correo}, tel {self._telefono}")
+
+    def validar(self):
+        self._validar_nombre(self._nombre)
+        self._validar_documento(self._documento)
+        self._validar_correo(self._correo)
+        self._validar_telefono(self._telefono)
 
   
 
@@ -111,3 +115,7 @@ for datos in datos_clientes:
     else:
         portafolio_clientes.append(cliente)
         print(f"{VERDE}Ingreso de datos acertado{RESET} --> {cliente}")
+
+
+print("Cliente repetido:", portafolio_clientes[0] == Cliente("Ana Torres", "1012305678", "ana@mail.com", "3101234567"))
+portafolio_clientes[0].validar()

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import date, timedelta
+from entidades import EntidadBase
 
 class ServicioError(Exception):
     pass
@@ -13,8 +14,9 @@ class ServicioNoDisponibleError(ServicioError):
     pass
 
 
-class Servicio(ABC): # tenemos el global de los servicios, luego definimos reserva de salas, alquileres y asesorias que tienen en si cositas ajenas entre sí
+class Servicio(EntidadBase): # tenemos el global de los servicios, luego definimos reserva de salas, alquileres y asesorias que tienen en si cositas ajenas entre sí
     def __init__(self, codigo_servicio, valor_servicio, texto_servicio):
+        super().__init__(codigo_servicio)
         self.codigo_servicio = codigo_servicio
   
         self.valor_servicio  = valor_servicio
@@ -36,13 +38,11 @@ class Servicio(ABC): # tenemos el global de los servicios, luego definimos reser
     def calcular_costo(self, duracion, impuesto=0.19, descuento_porcentaje=0):
         pass
 
-    @abstractmethod
-    def describir_servicio(self):
-        pass
+    def describir(self):
+        return self.describir_servicio()
 
-    @abstractmethod
-    def validar_parametros(self):
-        pass
+    def validar(self):
+        self.validar_parametros()
 
     def _validar_basicos(self):
         if not self.codigo_servicio:
@@ -195,3 +195,6 @@ catalogo_servicios = [
 
 for s in catalogo_servicios:
     print(f"[{s.codigo_servicio}] {s}")
+for s in catalogo_servicios:
+    s.validar()
+print("Servicios distintos:", len(set(catalogo_servicios)))

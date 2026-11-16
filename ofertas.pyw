@@ -46,7 +46,7 @@ class Servicio(ABC): # tenemos el global de los servicios, luego definimos reser
     def validar_parametros(self):
         pass
 
-    def Validaciones(self):
+    def _validar_basicos(self):
         if not self.codigo_servicio:
             raise ParametroInvalidoError("El servicio necesita un código")
         if self.valor_servicio <= 0:

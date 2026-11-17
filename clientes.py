@@ -98,24 +98,34 @@ datos_clientes = [ #ingresan datos y si validan, entran al portafolio
     ("Laura Pinto", "12345678", "laura@", "3001112233"),
     ("Hugo Mora", "12345678", "", "3001112233"),
     ("Jo", "12345678", "jo@mail.com", "3001112233"),                   
-    ("Nora Luna", "12345678", "nora@mail.com", "2001112233"),         
+    ("Nora Luna", "12345678", "nora@mail.com", "2001112233"),
+    ("Carlos Torres", "1012345678", "carlos@mail.com", "3111234567"),         
     ("Omar Silva", "", "omar@mail.com", "31011122ab")       
     #ver si un cliente ya esta en el portafolio, para no repetir clientes
 ]
 
-portafolio_clientes = [] #ete portafolio
+portafolio_clientes = []
 
 for datos in datos_clientes:
     try:
         cliente = Cliente(*datos)
+
+        # Verificar si el cliente ya existe en el portafolio, por su cedula 
+        repetido = any(
+            c.documento == cliente.documento
+            for c in portafolio_clientes
+        )
+
+        if repetido:
+            print(f"{AMARILLO}Cliente repetido{RESET} --> {cliente.documento}")
+            continue
+
     except ParametroFaltanteError as e:
         print(f"{AMARILLO}Falta un dato{RESET} --> {e}")
+
     except ClienteInvalidoError as e:
         print(f"{ROJO}Mal ingreso de datos{RESET} --> {e}")
+
     else:
         portafolio_clientes.append(cliente)
         print(f"{VERDE}Ingreso de datos acertado{RESET} --> {cliente}")
-
-
-print("Cliente repetido:", portafolio_clientes[0] == Cliente("Ana Torres", "1012305678", "ana@mail.com", "3101234567"))
-portafolio_clientes[0].validar()

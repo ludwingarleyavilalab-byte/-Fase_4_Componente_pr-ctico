@@ -10,7 +10,7 @@ class Servicio(EntidadBase, ABC):
     """Define lo que un servicio normal ha de tener"""
 
     DURACION_MAXIMA = 12   # Horas máximas permitidas por reserva, un dia.
-    def __init__(self, nombre, tarifa_base, disponible=True):
+    def __init__(self, codigo_servicio, nombre, tarifa_base, disponible=True):
         # Validaciones antes de asignar
         if nombre is None or not str(nombre).strip():
             raise ParametroFaltanteError("El nombre del servicio es obligatorio.")
@@ -19,7 +19,7 @@ class Servicio(EntidadBase, ABC):
         self._nombre = str(nombre).strip()    # Atributo protegido
         self._tarifa_base = float(tarifa_base)  # Tarifa por hora
         self._disponible = bool(disponible)   # Si se puede reservar o no
-        super().__init__()
+        super().__init__(codigo_servicio)
 
     @property
     def nombre(self):
@@ -36,6 +36,11 @@ class Servicio(EntidadBase, ABC):
     @disponible.setter
     def disponible(self, valor):
         self._disponible = bool(valor)
+
+    def validar(self):
+        """Implementa el método abstracto de EntidadBase: revisa los datos básicos."""
+        if not self._nombre or self._tarifa_base <= 0:
+            raise ServicioInvalidoError("Datos básicos del servicio inválidos.")
 
     def _validar_duracion(self, duracion):
         """Validación común de la duración (en horas) para todos los servicios."""
@@ -76,10 +81,10 @@ class Servicio(EntidadBase, ABC):
 class ReservaSala(Servicio):
     """Servicio 1: reserva de salas (costo por hora, con capacidad máxima)."""
 
-    def __init__(self, nombre, tarifa_base, capacidad, disponible=True):
+    def __init__(self, codigo_servicio, nombre, tarifa_base, capacidad, disponible=True):
         if isinstance(capacidad, bool) or not isinstance(capacidad, int) or capacidad <= 0:
             raise ServicioInvalidoError(f"Capacidad inválida: {capacidad!r}.")
-        super().__init__(nombre, tarifa_base, disponible)
+        super().__init__(codigo_servicio, nombre, tarifa_base, disponible)
         self._capacidad = capacidad
 
     def validar_parametros(self, duracion, **extras):
@@ -97,17 +102,17 @@ class ReservaSala(Servicio):
         return self._tarifa_base * duracion
 
     def describir(self):
-        return (f"Sala '{self._nombre}' (#{self.id}) - capacidad {self._capacidad}, "
+        return (f"Sala '{self._nombre}' (#{self.identificador}) - capacidad {self._capacidad}, "
                 f"${self._tarifa_base:,.0f}/h")
 
 
 class AlquilerEquipo(Servicio):
     """Servicio 2: alquiler de equipos (costo por hora y por unidad)."""
 
-    def __init__(self, nombre, tarifa_base, unidades, disponible=True):
+    def __init__(self, codigo_servicio, nombre, tarifa_base, unidades, disponible=True):
         if isinstance(unidades, bool) or not isinstance(unidades, int) or unidades <= 0:
             raise ServicioInvalidoError(f"Unidades inválidas: {unidades!r}.")
-        super().__init__(nombre, tarifa_base, disponible)
+        super().__init__(codigo_servicio, nombre, tarifa_base, disponible)
         self._unidades = unidades
 
     def validar_parametros(self, duracion, **extras):
@@ -125,7 +130,7 @@ class AlquilerEquipo(Servicio):
         return self._tarifa_base * duracion * extras.get("cantidad", 1)
 
     def describir(self):
-        return (f"Equipo '{self._nombre}' (#{self.id}) - {self._unidades} unidades, "
+        return (f"Equipo '{self._nombre}' (#{self.identificador}) - {self._unidades} unidades, "
                 f"${self._tarifa_base:,.0f}/h por unidad")
 
 
@@ -135,10 +140,10 @@ class AsesoriaEspecializada(Servicio):
     # Multiplicador de tarifa por nivel del asesor
     NIVELES = {"junior": 1.0, "senior": 1.5, "experto": 2.0}
 
-    def __init__(self, nombre, tarifa_base, especialidad, disponible=True):
+    def __init__(self, codigo_servicio, nombre, tarifa_base, especialidad, disponible=True):
         if especialidad is None or not str(especialidad).strip():
             raise ParametroFaltanteError("La especialidad es obligatoria.")
-        super().__init__(nombre, tarifa_base, disponible)
+        super().__init__(codigo_servicio, nombre, tarifa_base, disponible)
         self._especialidad = str(especialidad).strip()
 
     def validar_parametros(self, duracion, **extras):
@@ -156,11 +161,12 @@ class AsesoriaEspecializada(Servicio):
         return self._tarifa_base * duracion * self.NIVELES[extras["nivel"]]
 
     def describir(self):
-        return (f"Asesoría '{self._nombre}' (#{self.id}) - {self._especialidad}, "
+        return (f"Asesoría '{self._nombre}' (#{self.identificador}) - {self._especialidad}, "
                 f"${self._tarifa_base:,.0f}/h base")
 
 
 class ServicioNube(Servicio):
+    UNIDAD_DURACION = "meses"
     #Un servicio extra, me hacia ilusion colocar este la vdd
 
     def __init__( self, codigo_servicio, nombre, tarifa_base, espacio_estimado, tiempo_del_servicio, fecha_del_servicio, disponible=True):
@@ -204,28 +210,30 @@ class ServicioNube(Servicio):
 
 
 #Prueba de ejecucion en local
+
+if __name__ == "__main__":
     
-catalogo_servicios = [
+    catalogo_servicios = [
 
-    ReservaSala("S01", "Sala de reuniones pequeña", 25000, 8 ),
-    ReservaSala("S02", "Auditorio principal", 85000, 100 ),
-    ReservaSala("S03", "Sala de capacitaciones", 45000, 30 ),
-    AlquilerEquipo("E07", "Escáner documental", 10000, 6),
-    AlquilerEquipo("E08", "Micrófono inalámbrico", 7000, 12),
-    AlquilerEquipo("E09", "Cámara profesional", 25000, 4),
-    AlquilerEquipo("E10", "Router empresarial", 12000, 8),
-    AlquilerEquipo("E11", "Servidor físico", 50000, 3),
-    AlquilerEquipo("E12", "Switch de red", 18000, 10),
-    AsesoriaEspecializada("A11", "Inteligencia artificial", 100000, "Inteligencia artificial"),
-    AsesoriaEspecializada("A12", "Seguridad de redes", 90000, "Ciberseguridad"),
-    AsesoriaEspecializada("A13", "Optimización SQL", 70000, "Bases de datos"),
-    AsesoriaEspecializada("A14", "Desarrollo Python", 60000, "Programación"),
-    ServicioNube("N11", "Respaldo empresarial avanzado", 30000, 40, 12, date(2026, 11, 17) ),
-    ServicioNube("N12", "Entorno de desarrollo en la nube", 28000, 10, 5, date(2026, 11, 17) ),
-    ServicioNube("N13", "Almacenamiento de documentos", 10000,5, 2, date(2026, 11, 17)),
-    ]
+        ReservaSala("S01", "Sala de reuniones pequeña", 25000, 8 ),
+        ReservaSala("S02", "Auditorio principal", 85000, 100 ),
+        ReservaSala("S03", "Sala de capacitaciones", 45000, 30 ),
+        AlquilerEquipo("E07", "Escáner documental", 10000, 6),
+        AlquilerEquipo("E08", "Micrófono inalámbrico", 7000, 12),
+        AlquilerEquipo("E09", "Cámara profesional", 25000, 4),
+        AlquilerEquipo("E10", "Router empresarial", 12000, 8),
+        AlquilerEquipo("E11", "Servidor físico", 50000, 3),
+        AlquilerEquipo("E12", "Switch de red", 18000, 10),
+        AsesoriaEspecializada("A11", "Inteligencia artificial", 100000, "Inteligencia artificial"),
+        AsesoriaEspecializada("A12", "Seguridad de redes", 90000, "Ciberseguridad"),
+        AsesoriaEspecializada("A13", "Optimización SQL", 70000, "Bases de datos"),
+        AsesoriaEspecializada("A14", "Desarrollo Python", 60000, "Programación"),
+        ServicioNube("N11", "Respaldo empresarial avanzado", 30000, 40, 12, date(2026, 11, 17) ),
+        ServicioNube("N12", "Entorno de desarrollo en la nube", 28000, 10, 5, date(2026, 11, 17) ),
+        ServicioNube("N13", "Almacenamiento de documentos", 10000,5, 2, date(2026, 11, 17)),
+        ]
 
-for servicio in catalogo_servicios:
-    print(servicio.describir())
-    print("-" * 50)
+    for servicio in catalogo_servicios:
+        print(servicio.describir())
+        print("-" * 50)
 #falta excepciones, cierto

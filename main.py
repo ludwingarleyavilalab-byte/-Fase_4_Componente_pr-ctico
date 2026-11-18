@@ -1,13 +1,15 @@
-"""Simulación de 14 operaciones de Software FJ (válidas e inválidas)."""
+"""Simulación de más de 10 operaciones de Software FJ (válidas e inválidas)."""
+
+from datetime import date
 
 from gestor import GestorSoftwareFJ
-from servicios import ReservaSala, AlquilerEquipo, AsesoriaEspecializada, Servicio
+from servicios import ReservaSala, AlquilerEquipo, AsesoriaEspecializada, ServicioNube, Servicio
 from logger_config import ARCHIVO_LOG, obtener_logger
 
 logger = obtener_logger()
-IVA = 0.19   # Impuesto usado en la simulación
+IVA = 0.19    # Impuesto usado en la simulación
 
-_numero = 0   # Contador de operaciones para numerar la salida
+_numero = 0    # Contador de operaciones para numerar la salida
 
 
 def mostrar(descripcion, resultado):
@@ -38,21 +40,29 @@ def main():
             g.registrar_cliente(nombre="Marta Ríos", documento="55667788",
                                 correo="marta@mail.com"))
 
+    mostrar("Cliente repetido (mismo documento que Ana)",
+            g.registrar_cliente(nombre="Ana Torres Copia", documento="1012345678",
+                                correo="copia@mail.com", telefono="3151112233"))
+
     print("\n--- SERVICIOS ---")
-    sala = g.registrar_servicio(ReservaSala, nombre="Sala Innovación",
+    sala = g.registrar_servicio(ReservaSala, codigo_servicio="S01", nombre="Sala Innovación",
                                 tarifa_base=50000, capacidad=10)
     mostrar("Servicio válido: sala", sala)
-    equipo = g.registrar_servicio(AlquilerEquipo, nombre="Portátil Pro",
+    equipo = g.registrar_servicio(AlquilerEquipo, codigo_servicio="E01", nombre="Portátil Pro",
                                   tarifa_base=15000, unidades=5)
     mostrar("Servicio válido: equipo", equipo)
-    asesoria = g.registrar_servicio(AsesoriaEspecializada, nombre="Asesoría Cloud",
+    asesoria = g.registrar_servicio(AsesoriaEspecializada, codigo_servicio="A01", nombre="Asesoría Cloud",
                                     tarifa_base=80000, especialidad="Arquitectura en la nube")
     mostrar("Servicio válido: asesoría", asesoria)
+    nube = g.registrar_servicio(ServicioNube, codigo_servicio="N01", nombre="Almacenamiento de documentos",
+                                tarifa_base=10000, espacio_estimado=5, tiempo_del_servicio=2,
+                                fecha_del_servicio=date(2026, 12, 1))
+    mostrar("Servicio válido: nube", nube)
     mostrar("Servicio con tarifa negativa",
-            g.registrar_servicio(ReservaSala, nombre="Sala Rota", tarifa_base=-100, capacidad=4))
+            g.registrar_servicio(ReservaSala, codigo_servicio="S02", nombre="Sala Rota", tarifa_base=-100, capacidad=4))
     mostrar("Instanciar clase abstracta Servicio",
-            g.registrar_servicio(Servicio, nombre="Genérico", tarifa_base=1000))
-    sala_cerrada = g.registrar_servicio(ReservaSala, nombre="Sala en Mantenimiento",
+            g.registrar_servicio(Servicio, codigo_servicio="X01", nombre="Genérico", tarifa_base=1000))
+    sala_cerrada = g.registrar_servicio(ReservaSala, codigo_servicio="S03", nombre="Sala en Mantenimiento",
                                         tarifa_base=40000, capacidad=6, disponible=False)
 
     print("\n--- RESERVAS ---")
@@ -80,6 +90,12 @@ def main():
     mostrar("Cancelar de nuevo (operación no permitida)", g.cancelar_reserva(r3))
     mostrar("Confirmar reserva ya cancelada", g.confirmar_reserva(r3))
     mostrar("Reserva con duración no numérica", g.crear_reserva(ana, sala, "dos horas"))
+
+    r4 = g.crear_reserva(luis, nube, 3)
+    mostrar("Reserva de servicio en la nube (Luis, 3 meses)", r4)
+    mostrar("Confirmar reserva de nube", g.confirmar_reserva(r4))
+    mostrar("Procesar reserva de nube con IVA", g.procesar_reserva(r4, IVA))
+    mostrar("Reserva de nube con 200 meses (fuera de rango)", g.crear_reserva(ana, nube, 200))
 
     print("\n--- RESUMEN FINAL (el sistema siguió activo) ---")
     print(f"Clientes: {len(g.clientes)} | Servicios: {len(g.servicios)} | Reservas: {len(g.reservas)}")

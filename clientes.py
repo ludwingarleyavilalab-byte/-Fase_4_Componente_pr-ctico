@@ -6,16 +6,7 @@ AMARILLO = "\033[93m"
 RESET = "\033[0m"
 import re
 from entidades import EntidadBase 
-
-
-class ErrorSoftwareFJ(Exception):
-    """Base de todos los errores del sistema. El gestor atrapa esta."""
-
-class ParametroFaltanteError(ErrorSoftwareFJ):
-    """Falta un dato obligatorio."""
-
-class ClienteInvalidoError(ErrorSoftwareFJ):
-    """El dato existe pero tiene un formato incorrecto."""
+from excepciones import ParametroFaltanteError, ClienteInvalidoError
 
 class Cliente(EntidadBase):
     def __init__(self, nombre, documento, correo, telefono):
@@ -85,47 +76,44 @@ class Cliente(EntidadBase):
         self._validar_correo(self._correo)
         self._validar_telefono(self._telefono)
 
+if __name__ == "__main__":
   
+    datos_clientes = [ #ingresan datos y si validan, entran al portafolio
 
+        ("Ana Torres", "1012345678", "ana@mail.com", "3101234567"),
+        ("Luis Pérez", "80123456", "luis@mail.com", "3209876543"),
+        ("Pedro Gil", "12345678", "pedro-sin-arroba", "3001112233"),
+        ("Laura Pinto", "12345678", "laura@", "3001112233"),
+        ("Hugo Mora", "12345678", "", "3001112233"),
+        ("Jo", "12345678", "jo@mail.com", "3001112233"),                   
+        ("Nora Luna", "12345678", "nora@mail.com", "2001112233"),
+        ("Carlos Torres", "1012345678", "carlos@mail.com", "3111234567"),         
+        ("Omar Silva", "", "omar@mail.com", "31011122ab")       
+        #ver si un cliente ya esta en el portafolio, para no repetir clientes
+    ]
 
+    portafolio_clientes = []
 
+    for datos in datos_clientes:
+        try:
+            cliente = Cliente(*datos)
 
-datos_clientes = [ #ingresan datos y si validan, entran al portafolio
+            # Verificar si el cliente ya existe en el portafolio, por su cedula 
+            repetido = any(
+                c.documento == cliente.documento
+                for c in portafolio_clientes
+            )
 
-    ("Ana Torres", "1012345678", "ana@mail.com", "3101234567"),
-    ("Luis Pérez", "80123456", "luis@mail.com", "3209876543"),
-    ("Pedro Gil", "12345678", "pedro-sin-arroba", "3001112233"),
-    ("Laura Pinto", "12345678", "laura@", "3001112233"),
-    ("Hugo Mora", "12345678", "", "3001112233"),
-    ("Jo", "12345678", "jo@mail.com", "3001112233"),                   
-    ("Nora Luna", "12345678", "nora@mail.com", "2001112233"),
-    ("Carlos Torres", "1012345678", "carlos@mail.com", "3111234567"),         
-    ("Omar Silva", "", "omar@mail.com", "31011122ab")       
-    #ver si un cliente ya esta en el portafolio, para no repetir clientes
-]
+            if repetido:
+                print(f"{AMARILLO}Cliente repetido{RESET} --> {cliente.documento}")
+                continue
 
-portafolio_clientes = []
+        except ParametroFaltanteError as e:
+            print(f"{AMARILLO}Falta un dato{RESET} --> {e}")
 
-for datos in datos_clientes:
-    try:
-        cliente = Cliente(*datos)
+        except ClienteInvalidoError as e:
+            print(f"{ROJO}Mal ingreso de datos{RESET} --> {e}")
 
-        # Verificar si el cliente ya existe en el portafolio, por su cedula 
-        repetido = any(
-            c.documento == cliente.documento
-            for c in portafolio_clientes
-        )
-
-        if repetido:
-            print(f"{AMARILLO}Cliente repetido{RESET} --> {cliente.documento}")
-            continue
-
-    except ParametroFaltanteError as e:
-        print(f"{AMARILLO}Falta un dato{RESET} --> {e}")
-
-    except ClienteInvalidoError as e:
-        print(f"{ROJO}Mal ingreso de datos{RESET} --> {e}")
-
-    else:
-        portafolio_clientes.append(cliente)
-        print(f"{VERDE}Ingreso de datos acertado{RESET} --> {cliente}")
+        else:
+            portafolio_clientes.append(cliente)
+            print(f"{VERDE}Ingreso de datos acertado{RESET} --> {cliente}")

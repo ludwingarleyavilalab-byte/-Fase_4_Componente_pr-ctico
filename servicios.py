@@ -1,22 +1,17 @@
 """Clase abstracta Servicio y los tres servicios especializados de Software FJ."""
 
 from abc import ABC, abstractmethod                  # Clases abstractas
-
+from datetime import date, timedelta
 from entidades import EntidadBase
-from excepciones import (
-    ParametroFaltanteError,
-    ServicioInvalidoError,
-    CalculoInconsistenteError,
-)
+from excepciones import (ParametroFaltanteError,ServicioInvalidoError, CalculoInconsistenteError)
 
 
 class Servicio(EntidadBase, ABC):
-    """Servicio genérico. Define lo que TODO servicio debe saber hacer."""
+    """Define lo que un servicio normal ha de tener"""
 
-    DURACION_MAXIMA = 12   # Horas máximas permitidas por reserva
-
+    DURACION_MAXIMA = 12   # Horas máximas permitidas por reserva, un dia.
     def __init__(self, nombre, tarifa_base, disponible=True):
-        # Validaciones antes de asignar (si fallan, no se consume id)
+        # Validaciones antes de asignar
         if nombre is None or not str(nombre).strip():
             raise ParametroFaltanteError("El nombre del servicio es obligatorio.")
         if isinstance(tarifa_base, bool) or not isinstance(tarifa_base, (int, float)) or tarifa_base <= 0:
@@ -163,3 +158,74 @@ class AsesoriaEspecializada(Servicio):
     def describir(self):
         return (f"Asesoría '{self._nombre}' (#{self.id}) - {self._especialidad}, "
                 f"${self._tarifa_base:,.0f}/h base")
+
+
+class ServicioNube(Servicio):
+    #Un servicio extra, me hacia ilusion colocar este la vdd
+
+    def __init__( self, codigo_servicio, nombre, tarifa_base, espacio_estimado, tiempo_del_servicio, fecha_del_servicio, disponible=True):
+        #invalido la carencia de logica xd
+        if espacio_estimado <= 0:
+            raise ServicioInvalidoError("El espacio debe ser mayor a 0 TB.")
+        if tiempo_del_servicio <= 0:
+            raise ServicioInvalidoError("Los meses deben ser mayores que 0.")
+        if not isinstance(fecha_del_servicio, date):
+            raise ServicioInvalidoError("La fecha del servicio no es válida.")
+        #inserto stributos respectivos para ete servicio
+        self._espacio_estimado = espacio_estimado
+        self._tiempo_del_servicio = tiempo_del_servicio
+        self._fecha_del_servicio = fecha_del_servicio
+        super().__init__(codigo_servicio, nombre, tarifa_base, disponible)
+    #aqui valido el tiempo y los espacios para el servicio, el tiempo en meses y el espacio como es en Teritas /
+    def validar_parametros(self, duracion, **extras):     #El extas me permite meter mas argumentos, un parametro que chupa cositas que salgan  ("nombre ya definido como parametro","extra que se chupa", "otro extra que se chupa y asi")                                                 
+        if isinstance(duracion, bool) or not isinstance(duracion, int) or not 1 <= duracion <= 120:       #/
+            raise ServicioInvalidoError("Los meses deben estar entre 1 y 120.")                         #/
+                                                                                                      #/
+        espacio = extras.get("espacio_tb", self._espacio_estimado)                               #<---
+        if isinstance(espacio, bool) or not isinstance(espacio, (int, float)) or espacio <= 0:
+            raise ServicioInvalidoError("El espacio debe ser mayor a 0 TB.")
+
+    def calcular_costo(self, duracion=None, **extras):
+        if duracion is None:
+            duracion = self._tiempo_del_servicio
+
+        self.validar_parametros(duracion, **extras)
+        espacio = extras.get("espacio_tb", self._espacio_estimado)
+
+        return self._tarifa_base * espacio * duracion
+        #poco mas que eplicar aca, logica 
+    def fecha_final(self):
+        return self._fecha_del_servicio + timedelta(
+            days=30 * self._tiempo_del_servicio
+        )
+
+    def describir(self):
+        return (f"Nube '{self._nombre}' (#{self.identificador}) - " f"{self._espacio_estimado} TB por " f"{self._tiempo_del_servicio} meses, " f"${self._tarifa_base:,.0f}/TB al mes")
+
+
+#Prueba de ejecucion en local
+    
+catalogo_servicios = [
+
+    ReservaSala("S01", "Sala de reuniones pequeña", 25000, 8 ),
+    ReservaSala("S02", "Auditorio principal", 85000, 100 ),
+    ReservaSala("S03", "Sala de capacitaciones", 45000, 30 ),
+    AlquilerEquipo("E07", "Escáner documental", 10000, 6),
+    AlquilerEquipo("E08", "Micrófono inalámbrico", 7000, 12),
+    AlquilerEquipo("E09", "Cámara profesional", 25000, 4),
+    AlquilerEquipo("E10", "Router empresarial", 12000, 8),
+    AlquilerEquipo("E11", "Servidor físico", 50000, 3),
+    AlquilerEquipo("E12", "Switch de red", 18000, 10),
+    AsesoriaEspecializada("A11", "Inteligencia artificial", 100000, "Inteligencia artificial"),
+    AsesoriaEspecializada("A12", "Seguridad de redes", 90000, "Ciberseguridad"),
+    AsesoriaEspecializada("A13", "Optimización SQL", 70000, "Bases de datos"),
+    AsesoriaEspecializada("A14", "Desarrollo Python", 60000, "Programación"),
+    ServicioNube("N11", "Respaldo empresarial avanzado", 30000, 40, 12, date(2026, 11, 17) ),
+    ServicioNube("N12", "Entorno de desarrollo en la nube", 28000, 10, 5, date(2026, 11, 17) ),
+    ServicioNube("N13", "Almacenamiento de documentos", 10000,5, 2, date(2026, 11, 17)),
+    ]
+
+for servicio in catalogo_servicios:
+    print(servicio.describir())
+    print("-" * 50)
+#falta excepciones, cierto

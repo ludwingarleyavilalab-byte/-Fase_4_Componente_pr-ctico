@@ -104,6 +104,20 @@ def main():
     print(f"\nRegistro de errores y eventos en: {ARCHIVO_LOG}")
     logger.info("===== FIN DE LA SIMULACIÓN =====")
 
+def esperar_tecla():
+    """Pausa el programa para que la ventana no se cierre sola al abrirlo con doble clic."""
+    print("\nPresione cualquier tecla (Windows) o Enter (Linux) para terminar el programa...")
+    try:
+        import msvcrt    # Módulo que solo existe en Windows
+        msvcrt.getch()    # Espera una tecla, sin necesidad de pulsar Enter
+    except ImportError:
+        input()    # En Linux y Mac se espera la tecla Enter
+
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:    # Si algo falla, se muestra el error y la ventana no se cierra
+        import traceback
+        traceback.print_exc()
+    esperar_tecla()

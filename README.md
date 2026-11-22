@@ -72,7 +72,7 @@ errores. Esa carpeta se genera sola y no se sube al repositorio.
 | `excepciones.py` | Excepciones personalizadas del sistema, todas derivadas de `ErrorSoftwareFJ` (datos inválidos, parámetros faltantes, servicio no disponible, operación no permitida, reserva inválida y cálculo inconsistente). |
 | `logger_config.py` | Configuración del archivo de logs (`logs/software_fj.log`) donde se registran los errores y eventos relevantes. |
 | `Anexo 3 - Problema a desarrollar Fase 4.pdf` | Enunciado del ejercicio. |
-| catalogo.py | Datos de ejemplo (clientes y servicios) y pruebas de validación sobre ellos. Se ejecuta por separado con python3 catalogo.py y no interviene en la simulación de main.py. |
+| `catalogo.py` | Datos de ejemplo (clientes y servicios) y pruebas de validación sobre ellos. Se ejecuta por separado con python3 catalogo.py y no interviene en la simulación de main.py. |
 
 ## Conceptos de programación orientada a objetos aplicados
 

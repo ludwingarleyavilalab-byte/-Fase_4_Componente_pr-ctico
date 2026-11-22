@@ -55,6 +55,10 @@ Al final muestra un resumen con los clientes, servicios y reservas, y sus costos
 Se crea la carpeta `logs/` con el archivo `software_fj.log`, donde queda el registro de todos los eventos y
 errores. Esa carpeta se genera sola y no se sube al repositorio.
 
+### Datos de ejemplo (opcional)
+
+`python3 catalogo.py` muestra qué clientes de ejemplo se aceptan o se rechazan y la descripción de los 16 servicios del catálogo. No modifica la salida de `main.py`.
+
 ## Archivos del proyecto
 
 | Archivo | Para qué sirve |

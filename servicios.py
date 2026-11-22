@@ -209,31 +209,5 @@ class ServicioNube(Servicio):
         return (f"Nube '{self._nombre}' (#{self.identificador}) - " f"{self._espacio_estimado} TB por " f"{self._tiempo_del_servicio} meses, " f"${self._tarifa_base:,.0f}/TB al mes")
 
 
-#Prueba de ejecucion en local
 
-if __name__ == "__main__":
-    
-    catalogo_servicios = [
-
-        ReservaSala("S01", "Sala de reuniones pequeña", 25000, 8 ),
-        ReservaSala("S02", "Auditorio principal", 85000, 100 ),
-        ReservaSala("S03", "Sala de capacitaciones", 45000, 30 ),
-        AlquilerEquipo("E07", "Escáner documental", 10000, 6),
-        AlquilerEquipo("E08", "Micrófono inalámbrico", 7000, 12),
-        AlquilerEquipo("E09", "Cámara profesional", 25000, 4),
-        AlquilerEquipo("E10", "Router empresarial", 12000, 8),
-        AlquilerEquipo("E11", "Servidor físico", 50000, 3),
-        AlquilerEquipo("E12", "Switch de red", 18000, 10),
-        AsesoriaEspecializada("A11", "Inteligencia artificial", 100000, "Inteligencia artificial"),
-        AsesoriaEspecializada("A12", "Seguridad de redes", 90000, "Ciberseguridad"),
-        AsesoriaEspecializada("A13", "Optimización SQL", 70000, "Bases de datos"),
-        AsesoriaEspecializada("A14", "Desarrollo Python", 60000, "Programación"),
-        ServicioNube("N11", "Respaldo empresarial avanzado", 30000, 40, 12, date(2026, 11, 17) ),
-        ServicioNube("N12", "Entorno de desarrollo en la nube", 28000, 10, 5, date(2026, 11, 17) ),
-        ServicioNube("N13", "Almacenamiento de documentos", 10000,5, 2, date(2026, 11, 17)),
-        ]
-
-    for servicio in catalogo_servicios:
-        print(servicio.describir())
-        print("-" * 50)
 
